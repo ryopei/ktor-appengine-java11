@@ -36,9 +36,9 @@ tasks {
                 from(project.configurations.runtimeClasspath)
                 into(File(stagingExtension.stagingDirectory, "libs"))
             }
-            val appYaml = File(stagingExtension.stagingDirectory, "app.yaml").readText()
-            File(stagingExtension.stagingDirectory, "app.yaml")
-                .writeText(appYaml.replace("{{mainClassName}}", application.mainClassName))
+            File(stagingExtension.stagingDirectory, "app.yaml").run {
+                writeText(readText().replace("{{mainClassName}}", application.mainClassName))
+            }
         }
     }
 }
