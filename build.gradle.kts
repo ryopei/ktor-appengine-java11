@@ -2,6 +2,7 @@ plugins {
     kotlin("jvm") version "1.3.72"
     id("com.google.cloud.tools.appengine") version "2.2.0"
     application
+    id("com.github.johnrengelman.shadow") version "5.2.0"
 }
 
 group = "org.example"
@@ -22,6 +23,10 @@ dependencies {
     implementation(ktor("server-netty"))
 }
 
+application {
+    mainClassName = "com.example.MyApplicationKt"
+}
+
 tasks {
     compileKotlin {
         kotlinOptions.jvmTarget = "1.8"
@@ -29,27 +34,22 @@ tasks {
     compileTestKotlin {
         kotlinOptions.jvmTarget = "1.8"
     }
-    appengineStage {
-
-        doLast {
-            copy {
-                from(project.configurations.runtimeClasspath)
-                into(File(stagingExtension.stagingDirectory, "libs"))
-            }
-            File(stagingExtension.stagingDirectory, "app.yaml").run {
-                writeText(readText().replace("{{mainClassName}}", application.mainClassName))
-            }
+    jar {
+        manifest {
+            attributes(mapOf(
+                "Main-Class" to application.mainClassName
+            ))
         }
+    }
+    shadowJar {
+        archiveClassifier.set("")
     }
 }
 
 appengine {
     deploy {
-        projectId = "<YOUR_PROJECT_ID>"// "GCLOUD_CONFIG"を設定するとgcloud configで設定しているプロジェクトにデプロイされます
+        projectId = "GCLOUD_CONFIG"// "GCLOUD_CONFIG"を設定するとgcloud configで設定しているプロジェクトにデプロイされます
         version = "GCLOUD_CONFIG" //"GCLOUD_CONFIG"を設定すると自動でバージョン番号が設定されます
     }
 }
 
-application {
-    mainClassName = "com.example.MyApplicationKt"
-}
